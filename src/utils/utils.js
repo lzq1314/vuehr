@@ -55,6 +55,8 @@ export const formatRoutes = (routes)=> {
           require(['../components/system/' + component + '.vue'], resolve)
         } else if(component.startsWith("Mem")){
           require(['../components/member/' + component + '.vue'], resolve)
+        } else if(component.startsWith("Sho")){
+          require(['../components/shopping/' + component + '.vue'], resolve)
         }
       },
       name: name,

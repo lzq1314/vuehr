@@ -10,6 +10,7 @@ import {getRequest} from './utils/api'
 import {postRequest} from './utils/api'
 import {deleteRequest} from './utils/api'
 import {putRequest} from './utils/api'
+import {postRequestJson} from './utils/api'
 import {initMenu} from './utils/utils'
 import {isNotNullORBlank} from './utils/utils'
 import './utils/filter_utils'
@@ -23,6 +24,7 @@ Vue.prototype.postRequest = postRequest;
 Vue.prototype.deleteRequest = deleteRequest;
 Vue.prototype.putRequest = putRequest;
 Vue.prototype.isNotNullORBlank = isNotNullORBlank;
+Vue.prototype.postRequestJson = postRequestJson;
 
 router.beforeEach((to, from, next)=> {
     if (to.name == 'Login') {

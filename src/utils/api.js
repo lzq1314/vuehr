@@ -88,3 +88,14 @@ export const getRequest = (url) => {
     url: `${base}${url}`
   });
 }
+
+export const postRequestJson = (url, params) => {
+  return axios({
+    method: 'post',
+    url:`${base}${url}`,
+    data:params,
+    /* header:{
+        'Content-Type':'application/json'  //如果写成contentType会报错
+    } */
+  });
+}

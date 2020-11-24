@@ -4,17 +4,17 @@
       <el-header style="padding: 0px;display:flex;justify-content:space-between;align-items: center">
         <div style="display: inline">
           <el-input
-            placeholder="通过会员名称搜索会员,记得回车哦..."
+            placeholder="通过手机号或会员卡号查询,记得回车哦..."
             clearable
             @change="keywordsChange"
             style="width: 300px;margin: 0px;padding: 0px;"
             size="mini"
             :disabled="advanceSearchViewVisible"
-            @keyup.enter.native="searchMember"
+            @keyup.enter.native="searchOrder"
             prefix-icon="el-icon-search"
             v-model="keywords">
           </el-input>
-          <el-button type="primary" size="mini" style="margin-left: 5px" icon="el-icon-search" @click="searchMember">搜索
+          <el-button type="primary" size="mini" style="margin-left: 5px" icon="el-icon-search" @click="searchOrder">搜索
           </el-button>
           <el-button slot="reference" type="primary" size="mini" style="margin-left: 5px"
                      @click="showAdvanceSearchView"><i
@@ -38,8 +38,12 @@
                                                                        style="margin-right: 5px"></i>导出数据
           </el-button>
           <el-button type="primary" size="mini" icon="el-icon-plus"
-                     @click="showAddEmpView">
-            添加会员
+                     @click="showAddOrderView">
+            创建订单
+          </el-button>
+          <el-button type="primary" size="mini" icon="el-icon-plus"
+                     @click="doSettlement">
+            结算
           </el-button>
         </div>
       </el-header>
@@ -70,13 +74,13 @@
                 </el-col>
                 <el-col :span="4" :offset="4">
                   <el-button size="mini" @click="cancelSearch">取消</el-button>
-                  <el-button icon="el-icon-search" type="primary" size="mini" @click="searchMember">搜索</el-button>
+                  <el-button icon="el-icon-search" type="primary" size="mini" @click="searchOrder">搜索</el-button>
                 </el-col>
               </el-row>
             </div>
           </transition>
           <el-table
-            :data="members"
+            :data="orders"
             v-loading="tableLoading"
             border
             stripe
@@ -89,44 +93,44 @@
               width="30">
             </el-table-column>
             <el-table-column
-              prop="name"
+              prop="commodity_name"
               align="left"
               fixed
-              label="姓名"
+              label="商品名称"
               width="90">
             </el-table-column>
             <el-table-column
-              prop="sex"
+              prop="commodity_amount"
               width="80"
               align="left"
-              label="性别">
+              label="商品金额">
+            </el-table-column>
+            <el-table-column
+              prop="commodity_count"
+              width="150"
+              align="left"
+              label="商品数量">
             </el-table-column>
             <el-table-column
               width="150"
               align="left"
               label="创建日期">
-              <template slot-scope="scope">{{ scope.row.createDate | formatDateTime}}</template>
+              <template slot-scope="scope">{{ scope.row.create_time | formatDateTime}}</template>
             </el-table-column>
             <el-table-column
               prop="phoneNumber"
               width="150"
-              align="left"
               label="手机号">
             </el-table-column>
             <el-table-column
-              prop="telPhoneNumber"
               width="150"
-              label="电话号">
-            </el-table-column>
-            <el-table-column
-              width="150"
-              prop="idCardNumber"
-              label="身份证号">
-            </el-table-column>
-            <el-table-column
               prop="memberCardNumber"
-              width="100"
               label="会员卡号">
+            </el-table-column>
+            <el-table-column
+              prop="member_name"
+              width="100"
+              label="会员名称">
             </el-table-column>
             <el-table-column
               prop="balance"
@@ -138,7 +142,7 @@
               align="left"
               label="备注">
             </el-table-column>
-            <el-table-column
+            <!-- <el-table-column
               fixed="right"
               label="操作"
               width="195">
@@ -156,12 +160,9 @@
                            @click="deleteEmp(scope.row)">删除
                 </el-button>
               </template>
-            </el-table-column>
+            </el-table-column> -->
           </el-table>
           <div style="display: flex;justify-content: space-between;margin: 2px">
-            <el-button type="danger" size="mini" v-if="emps.length>0" :disabled="multipleSelection.length==0"
-                       @click="deleteManyEmps">批量删除
-            </el-button>
             <el-pagination
               background
               :page-size="10"
@@ -174,7 +175,7 @@
         </div>
       </el-main>
     </el-container>
-    <el-form :model="member" :rules="rules" ref="addMemberForm" style="margin: 0px;padding: 0px;">
+    <el-form :model="order" :rules="rules" ref="addOrderForm" style="margin: 0px;padding: 0px;">
       <div style="text-align: left">
         <el-dialog
           :title="dialogTitle"
@@ -182,117 +183,88 @@
           :close-on-click-modal="false"
           :visible.sync="dialogVisible"
           width="77%">
-          <el-row>
-            <el-col :span="6">
-              <div>
-                <el-form-item label="会员名称:" prop="name">
-                  <el-input prefix-icon="el-icon-edit" v-model="member.name" size="mini" style="width: 150px"
+                <el-form-item label="会员名称:" prop="member_name">
+                  <el-input prefix-icon="el-icon-edit" v-model="order.member_name" size="mini" style="width: 150px"
                             placeholder="请输入员工姓名"></el-input>
                 </el-form-item>
-              </div>
-            </el-col>
-            <el-col :span="6">
-              <div>
-                <el-form-item label="性别:" prop="sex">
-                  <el-radio-group v-model="member.sex">
-                    <el-radio label="男">男</el-radio>
-                    <el-radio style="margin-left: 15px" label="女">女</el-radio>
-                  </el-radio-group>
-                </el-form-item>
-              </div>
-            </el-col>
-            <el-col :span="6">
-              <div>
-                <el-form-item label="手机号:" prop="phoneNumber">
-                  <el-input prefix-icon="el-icon-edit" v-model="member.phoneNumber" size="mini" style="width: 150px"
-                            placeholder="请输入员工姓名"></el-input>
-                </el-form-item>
-              </div>
-            </el-col>
-
-          </el-row>
-          <el-row>
-            <el-col :span="6">
-              <div>
-                <el-form-item label="电话号:" prop="telPhoneNumber">
-                  <el-input prefix-icon="el-icon-edit" v-model="member.telPhoneNumber" size="mini" style="width: 150px"
-                            placeholder="请输入员工姓名"></el-input>
-                </el-form-item>
-              </div>
-            </el-col>
-            <el-col :span="6">
-              <div>
-                <el-form-item label="身份证号:" prop="idCardNumber">
-                  <el-input prefix-icon="el-icon-edit" v-model="member.idCardNumber" size="mini" style="width: 150px"
-                            placeholder="请输入员工姓名"></el-input>
-                </el-form-item>
-              </div>
-            </el-col>
-            <el-col :span="6">
-              <div>
                 <el-form-item label="会员卡号:" prop="memberCardNumber">
-                  <el-input prefix-icon="el-icon-edit" v-model="member.memberCardNumber" size="mini" style="width: 150px"
+                  <el-input prefix-icon="el-icon-edit" v-model="order.memberCardNumber" size="mini" style="width: 150px"
                             placeholder="请输入员工姓名"></el-input>
                 </el-form-item>
-              </div>
-            </el-col>
-          </el-row>
-          <el-row>
-            <el-col :span="6">
-              <div>
-                <el-form-item label="备注:" prop="remark">
-                  <el-input prefix-icon="el-icon-edit" v-model="member.remark" size="mini" style="width: 150px"
+                <el-form-item label="手机号:" prop="phoneNumber">
+                  <el-input prefix-icon="el-icon-edit" v-model="order.phoneNumber" size="mini" style="width: 150px"
                             placeholder="请输入员工姓名"></el-input>
                 </el-form-item>
-              </div>
-            </el-col>
-          </el-row>
+              <el-form-item label="商品名称:" prop="commodity">
+                <el-select v-model="order.commodity" style="width: 150px" size="mini" placeholder="请选择民族">
+                  <el-option
+                    v-for="item in commoditys"
+                    :key="item.id"
+                    :label="item.commodity_name"
+                    :value="item.id">
+                  </el-option>
+                </el-select>
+              </el-form-item>
+                <el-form-item label="商品数量:" prop="commodity_count">
+                  <el-input prefix-icon="el-icon-edit" v-model="order.commodity_count" size="mini" style="width: 150px"
+                            placeholder="请输入员工姓名"></el-input>
+                </el-form-item>
           <span slot="footer" class="dialog-footer">
+     <el-table
+       :data="shops"
+       v-loading="tableLoading"
+       border
+       stripe
+       @selection-change="handleSelectionChange"
+       size="mini"
+       style="width: 80%">
+       <el-table-column
+         type="selection"
+         align="left"
+         width="150">
+       </el-table-column>
+       <el-table-column
+         prop="commodity_name"
+         align="left"
+         fixed
+         label="商品名称"
+         width="150">
+       </el-table-column>
+       <el-table-column
+         prop="commodity_amount"
+         width="150"
+         align="left"
+         label="商品金额">
+       </el-table-column>
+       <el-table-column
+         prop="cnt"
+         width="150"
+         align="left"
+         label="商品数量">
+       </el-table-column>
+       <el-table-column
+         fixed="right"
+         label="选择数量"
+         width="195">
+         <template slot-scope="scope">
+           <el-input-number v-model="scope.row.cnt" @change="handleChangeNumber(scope.row)" :min="0" :max="100" label="描述文字"></el-input-number>
+         </template>
+       </el-table-column>
+     </el-table>
     <el-button size="mini" @click="cancelEidt">取 消</el-button>
-    <el-button size="mini" type="primary" @click="addMember('addMemberForm')">确 定</el-button>
+    <el-button size="mini" type="primary" @click="addOrder('addOrderForm')">确 定</el-button>
   </span>
         </el-dialog>
       </div>
     </el-form>
-
-    <el-form :model="memberMoney" :rules="rules" label-width="90px" ref="addMemberMoney">
-        <div style="text-align: center">
-          <el-dialog
-            :title="addMoneyDialogTitle"
-            style="padding: 0px;"
-            :close-on-click-modal="false"
-            :visible.sync="addMoneyDialogVisible"
-            width="40%">
-                  <el-form-item label="会员名称:" prop="name">
-                    <el-input prefix-icon="el-icon-edit" v-model="memberMoney.name" size="mini" style="width: 150px"
-                              placeholder="请输入员工姓名"></el-input>
-                  </el-form-item>
-                  <el-form-item label="手机号:" prop="phoneNumber">
-                    <el-input prefix-icon="el-icon-edit" v-model="memberMoney.phoneNumber" size="mini" style="width: 150px"
-                              placeholder="请输入员工姓名"></el-input>
-                  </el-form-item>
-                  <el-form-item label="会员卡号:" prop="memberCardNumber">
-                    <el-input prefix-icon="el-icon-edit" v-model="memberMoney.memberCardNumber" size="mini" style="width: 150px"
-                              placeholder="请输入员工姓名"></el-input>
-                  </el-form-item>
-                  <el-form-item label="充值金额:" prop="amount ">
-                    <el-input prefix-icon="el-icon-edit" v-model="memberMoney.amount" size="mini" style="width: 150px"
-                              placeholder="请输入员工姓名"></el-input>
-                  </el-form-item>
-            <span slot="footer" class="dialog-footer">
-              <el-button size="mini" @click="cancelMemberMoneyEidt">取 消</el-button>
-              <el-button size="mini" type="primary" @click="addMemberMoney('addMemberMoney')">确 定</el-button>
-            </span>
-          </el-dialog>
-        </div>
-      </el-form>
   </div>
 </template>
 <script>
   export default {
     data() {
       return {
-        emps: [],
+        shops: [],
+        orders: [],
         members: [],
         keywords: '',
         fileUploadBtnText: '导入数据',
@@ -302,7 +274,7 @@
         dialogTitle: '',
         multipleSelection: [],
         depTextColor: '#c0c4cc',
-        nations: [],
+        commoditys: [],
         politics: [],
         positions: [],
         joblevels: [],
@@ -358,14 +330,17 @@
           memberCardNumber: '',
           remark:''
         },
-        member: {
+        order: {
           id: '',
-          sex: '',
+          commodity: '',
+          member_id: '',
+          commodity_name: '',
+          commodity_amount: '',
           phoneNumber: '',
-          telPhoneNumber: '',
-          idCardNumber: '',
-          memberCardNumber: '',
-          remark:''
+          memberCardNumber:'',
+          commodity_count:'',
+          member_name:'',
+          balance: 0
         },
         params:{
           phoneNumber: '',
@@ -387,14 +362,12 @@
     },
     mounted: function () {
       this.initData();
-      this.loadMembers();
     },
     methods: {
       fileUploadSuccess(response, file, fileList) {
         if (response) {
           this.$message({type: response.status, message: response.msg});
         }
-        this.loadMembers();
         this.fileUploadBtnText = '导入数据';
       },
       fileUploadError(err, file, fileList) {
@@ -411,7 +384,6 @@
         this.advanceSearchViewVisible = false;
         this.emptyMemberData();
         this.beginDateScope = '';
-        this.loadMembers();
       },
       showAdvanceSearchView() {
         this.advanceSearchViewVisible = !this.advanceSearchViewVisible;
@@ -419,7 +391,6 @@
         if (!this.advanceSearchViewVisible) {
           this.emptyMemberData();
           this.beginDateScope = '';
-          this.loadMembers();
         }
       },
       handleSelectionChange(val) {
@@ -449,89 +420,64 @@
         }).catch(() => {
         });
       },
-      doDelete(ids) {
-        this.tableLoading = true;
-        var _this = this;
-        this.deleteRequest("/employee/basic/emp/" + ids).then(resp => {
-          _this.tableLoading = false;
-          if (resp && resp.status == 200) {
-            var data = resp.data;
-
-            _this.loadMembers();
-          }
-        })
-      },
       keywordsChange(val) {
-        if (val == '') {
-          this.loadMembers();
-        }
+       // if (val == '') {
+          this.loadOrders();
+        //}
       },
-      searchMember() {
-        this.loadMembers();
+      searchOrder() {
+        this.loadOrders();
       },
       currentChange(currentChange) {
         this.currentPage = currentChange;
-        this.loadMembers();
+        this.loadOrders();
       },
-      loadMembers() {
+      loadOrders() {
+
+        this.getRequest("/shopping/basic/getOneMemberByPhone?phoneNumber=" + this.keywords).then(resp => {
+          if (resp && resp.status == 200) {
+            var data = resp.data;
+            _this.order.member_id = data.member.id;
+            _this.order.phoneNumber = data.member.phoneNumber;
+            _this.order.memberCardNumber = data.member.memberCardNumber;
+            _this.order.member_name = data.member.name;
+            _this.order.balance = data.member.balance;
+            _this.shops = data.commodityList;
+          }
+        })
+
+
         var _this = this;
         this.tableLoading = true;
-        this.getRequest("/member/basic/getMemberList?page=" + this.currentPage + "&size=10&keywords="+ this.keywords+"&beginDateScope="+this.params.beginDateScope+"&phoneNumber="+this.params.phoneNumber).then(resp => {
+
+        this.getRequest("/shopping/basic/getOrderByPhone?phoneNumber=" + this.keywords + "&memberCardNumber="+ this.keywords).then(resp => {
           this.tableLoading = false;
           if (resp && resp.status == 200) {
             var data = resp.data;
-            _this.members = data.members;
+            _this.orders = data.orders;
             _this.totalCount = data.count;
-            _this.emptyMemberData();
+           // _this.emptyMemberData();
           }
         })
       },
-      addMember(formName) {
+      addOrder(formName) {
         var _this = this;
         this.$refs[formName].validate((valid) => {
           if (valid) {
-            if (this.member.id) {
-              //更新
-              this.tableLoading = true;
-              this.putRequest("/member/basic/updateMember", this.member).then(resp => {
-                _this.tableLoading = false;
-                if (resp && resp.status == 200) {
-                  var data = resp.data;
-                  _this.dialogVisible = false;
-                  _this.emptyMemberData();
-                  _this.loadMembers();
-                }
-              })
-            } else {
               //添加
-              this.tableLoading = true;
-              this.postRequest("/member/basic/addMember", _this.member).then(resp => {
-                _this.tableLoading = false;
-                if (resp && resp.status == 200) {
-                  var data = resp.data;
-                  _this.dialogVisible = false;
-                  _this.emptyMemberData();
-                  _this.loadMembers();
-                }
-              })
-            }
-          } else {
-            return false;
+              var par = {
+                commodity: this.shops,
+                phoneNumber: this.keywords
+              }
+             this.tableLoading = true;
+             this.postRequestJson("/shopping/basic/addOrder",par).then(resp => {
+               _this.tableLoading = false;
+               if (resp && resp.status == 200) {
+
+               }
+             })
           }
-        });
-      },
-      addMemberMoney(addMoney){//充值
-      var _this = this;
-        this.tableLoading = true;
-        this.postRequest("/member/basic/addMoney?id="+this.memberMoney.id+"&amount="+this.memberMoney.amount).then(resp => {
-          _this.tableLoading = false;
-          if (resp && resp.status == 200) {
-            var data = resp.data;
-            _this.addMoneyDialogVisible = false;
-            _this.emptyAddMoneyData();
-            _this.loadMembers();
-          }
-        })
+          })
       },
       cancelEidt(){
         this.dialogVisible = false;
@@ -561,40 +507,38 @@
       },
       initData() {
         var _this = this;
-        this.getRequest("/employee/basic/basicdata").then(resp => {
-          if (resp && resp.status == 200) {
-            var data = resp.data;
-            _this.nations = data.nations;
-            _this.politics = data.politics;
-            _this.deps = data.deps;
-            _this.positions = data.positions;
-            _this.joblevels = data.joblevels;
-            _this.emp.workID = data.workID;
-          }
-        })
       },
       showEditMemberView(row) {
         this.dialogTitle = "编辑会员信息";
         this.member = row;
         this.dialogVisible = true;
       },
-      addMoneyView(row){
-        this.addMoneyDialogTitle = "添加员工";
-        this.addMoneyDialogVisible = true;
-        this.memberMoney.id = row.id;
-        this.memberMoney.name = row.name;
-        this.memberMoney.phoneNumber = row.phoneNumber;
-        this.memberMoney.memberCardNumber = row.memberCardNumber;
-      },
-      showAddEmpView() {
-        this.dialogTitle = "添加员工";
+      showAddOrderView() {
+        if(this.keywords == null || this.keywords ==""){
+          this.$alert('请输入会员手机号或会员卡号后查询', '友情提示', {
+            confirmButtonText: '确定',
+            /* callback: action => {
+              this.$notify({
+                title: '重要重要!',
+                type: 'warning',
+                message: '小伙伴们需要注意的是，目前只有权限管理模块完工了，因此这个项目中你无法看到所有的功能，除了权限管理相关的模块。权限管理相关的模块主要有两个，分别是 [系统管理->基础信息设置->权限组] 可以管理角色和资源的关系， [系统管理->操作员管理] 可以管理用户和角色的关系。',
+                duration: 0
+              });
+            } */
+          });
+          return
+        }
+        this.dialogTitle = "加购商品";
         this.dialogVisible = true;
         var _this = this;
-        this.getRequest("/employee/basic/maxWorkID").then(resp => {
-          if (resp && resp.status == 200) {
-            _this.emp.workID = resp.data;
-          }
-        })
+
+      this.getRequest("/shopping/basic/getCommodity").then(resp => {
+                if (resp && resp.status == 200) {
+                  var data = resp.data;
+                  this.commoditys = data.commodity;
+                }
+              })
+
       },
       emptyMemberData() {
         this.member = {
@@ -615,6 +559,65 @@
           memberCardNumber: '',
           amount: ''
         }
+      },
+      handleChangeNumber(row){
+        console.log(row)
+      },
+      doSettlement(){
+        var orderList = this.orders;
+        if(orderList.length == 0){
+          this.$alert('没有消费内容，无要结算信息', '友情提示', {
+            confirmButtonText: '确定',
+          });
+          return;
+        }
+        //会员名称，手机号，会员卡号，余额,消费金额
+       /* _this.order.member_id = data.member.id;
+        _this.order.phoneNumber = data.member.phoneNumber;
+        _this.order.memberCardNumber = data.member.memberCardNumber;
+        _this.order.member_name = data.member.name;
+        _this.order.balance = data.member.balance;
+ */
+        var memberName = this.order.member_name
+        var memberPhoneNumber = this.order.phoneNumber
+        var memberCardNumber = this.order.memberCardNumber
+        var balance = this.order.balance
+        var amount = 0;//
+        for(var i =0;i<orderList.length;i++){
+            amount = amount + (orderList[i].commodity_count * orderList[i].commodity_amount);
+        }
+        //查询用户余额
+        /* this.getRequest("/shopping/basic/getOneMemberByPhone?phoneNumber=" + this.keywords).then(resp => {
+          this.tableLoading = false;
+          if (resp && resp.status == 200) {
+            var data = resp.data;
+            memberCardNumber = data.member.memberCardNumber;
+            balance = data.member.balance;
+          }
+        }) */
+        if(amount > balance){
+          this.$alert(memberName+' 会员余额不足，当前余额：'+balance+'，消费金额：'+amount+'；请及时充值！！！', '友情提示', {
+            confirmButtonText: '确定',
+          });
+          return;
+        }else{
+          this.$alert(memberName+' 会员，手机号：'+memberPhoneNumber+'，会员卡号：'+memberCardNumber+'，当前余额：'+balance+',消费金额：'+amount+';核对无误后点击确定结算！！！', '友情提示', {
+            confirmButtonText: '确定',
+            callback: action => {
+              this.getRequest("/shopping/basic/doSettlement?phoneNumber=" + this.keywords + "&amount="+ amount).then(resp => {
+                this.tableLoading = false;
+                if (resp && resp.status == 200) {
+                  /* var data = resp.data;
+                  _this.orders = data.orders;
+                  _this.totalCount = data.count;
+                 // _this.emptyMemberData(); */
+                }
+              })
+            }
+          });
+        }
+
+
       }
     }
   };
