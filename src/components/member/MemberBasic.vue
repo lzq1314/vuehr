@@ -149,19 +149,19 @@
                 <el-button @click="addMoneyView(scope.row)" style="padding: 3px 4px 3px 4px;margin: 2px"
                            size="mini">充值
                 </el-button>
-                <el-button style="padding: 3px 4px 3px 4px;margin: 2px" type="primary"
+              <!--  <el-button style="padding: 3px 4px 3px 4px;margin: 2px" type="primary"
                            size="mini">查看高级资料
-                </el-button>
-                <el-button type="danger" style="padding: 3px 4px 3px 4px;margin: 2px" size="mini"
+                </el-button> -->
+               <!-- <el-button type="danger" style="padding: 3px 4px 3px 4px;margin: 2px" size="mini"
                            @click="deleteEmp(scope.row)">删除
-                </el-button>
+                </el-button> -->
               </template>
             </el-table-column>
           </el-table>
           <div style="display: flex;justify-content: space-between;margin: 2px">
-            <el-button type="danger" size="mini" v-if="emps.length>0" :disabled="multipleSelection.length==0"
+            <!-- <el-button type="danger" size="mini" v-if="emps.length>0" :disabled="multipleSelection.length==0"
                        @click="deleteManyEmps">批量删除
-            </el-button>
+            </el-button> -->
             <el-pagination
               background
               :page-size="10"
@@ -187,7 +187,7 @@
               <div>
                 <el-form-item label="会员名称:" prop="name">
                   <el-input prefix-icon="el-icon-edit" v-model="member.name" size="mini" style="width: 150px"
-                            placeholder="请输入员工姓名"></el-input>
+                            placeholder="请输入会员名称"></el-input>
                 </el-form-item>
               </div>
             </el-col>
@@ -205,7 +205,7 @@
               <div>
                 <el-form-item label="手机号:" prop="phoneNumber">
                   <el-input prefix-icon="el-icon-edit" v-model="member.phoneNumber" size="mini" style="width: 150px"
-                            placeholder="请输入员工姓名"></el-input>
+                            placeholder="请输入手机号"></el-input>
                 </el-form-item>
               </div>
             </el-col>
@@ -216,7 +216,7 @@
               <div>
                 <el-form-item label="电话号:" prop="telPhoneNumber">
                   <el-input prefix-icon="el-icon-edit" v-model="member.telPhoneNumber" size="mini" style="width: 150px"
-                            placeholder="请输入员工姓名"></el-input>
+                            placeholder="请输入电话号"></el-input>
                 </el-form-item>
               </div>
             </el-col>
@@ -224,7 +224,7 @@
               <div>
                 <el-form-item label="身份证号:" prop="idCardNumber">
                   <el-input prefix-icon="el-icon-edit" v-model="member.idCardNumber" size="mini" style="width: 150px"
-                            placeholder="请输入员工姓名"></el-input>
+                            placeholder="请输入身份证号"></el-input>
                 </el-form-item>
               </div>
             </el-col>
@@ -232,7 +232,7 @@
               <div>
                 <el-form-item label="会员卡号:" prop="memberCardNumber">
                   <el-input prefix-icon="el-icon-edit" v-model="member.memberCardNumber" size="mini" style="width: 150px"
-                            placeholder="请输入员工姓名"></el-input>
+                            placeholder="请输入会员卡号"></el-input>
                 </el-form-item>
               </div>
             </el-col>
@@ -242,7 +242,7 @@
               <div>
                 <el-form-item label="备注:" prop="remark">
                   <el-input prefix-icon="el-icon-edit" v-model="member.remark" size="mini" style="width: 150px"
-                            placeholder="请输入员工姓名"></el-input>
+                            placeholder="请输入备注信息"></el-input>
                 </el-form-item>
               </div>
             </el-col>
@@ -264,15 +264,15 @@
             :visible.sync="addMoneyDialogVisible"
             width="40%">
                   <el-form-item label="会员名称:" prop="name">
-                    <el-input prefix-icon="el-icon-edit" v-model="memberMoney.name" size="mini" style="width: 150px"
+                    <el-input :disabled="true" v-model="memberMoney.name" size="mini" style="width: 150px"
                               placeholder="请输入员工姓名"></el-input>
                   </el-form-item>
                   <el-form-item label="手机号:" prop="phoneNumber">
-                    <el-input prefix-icon="el-icon-edit" v-model="memberMoney.phoneNumber" size="mini" style="width: 150px"
+                    <el-input :disabled="true" v-model="memberMoney.phoneNumber" size="mini" style="width: 150px"
                               placeholder="请输入员工姓名"></el-input>
                   </el-form-item>
                   <el-form-item label="会员卡号:" prop="memberCardNumber">
-                    <el-input prefix-icon="el-icon-edit" v-model="memberMoney.memberCardNumber" size="mini" style="width: 150px"
+                    <el-input :disabled="true"  v-model="memberMoney.memberCardNumber" size="mini" style="width: 150px"
                               placeholder="请输入员工姓名"></el-input>
                   </el-form-item>
                   <el-form-item label="充值金额:" prop="amount ">
@@ -372,7 +372,9 @@
           beginDateScope:''
         },
         rules: {
-          name: [{required: true, message: '必填:姓名', trigger: 'blur'}]
+          name: [{required: true, message: '必填:姓名', trigger: 'blur'}],
+          sex: [{required: true, message: '必填:性别', trigger: 'blur'}],
+          phoneNumber: [{required: true, message: '必填:手机号码', trigger: 'blur'}],
         },
         addMoneyDialogTitle: '',
         addMoneyDialogVisible: false,
@@ -425,7 +427,7 @@
       handleSelectionChange(val) {
         this.multipleSelection = val;
       },
-      deleteManyEmps() {
+      /* deleteManyEmps() {
         this.$confirm('此操作将删除[' + this.multipleSelection.length + ']条数据, 是否继续?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
@@ -438,8 +440,8 @@
           this.doDelete(ids);
         }).catch(() => {
         });
-      },
-      deleteEmp(row) {
+      }, */
+      /* deleteEmp(row) {
         this.$confirm('此操作将永久删除[' + row.name + '], 是否继续?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
@@ -448,7 +450,7 @@
           this.doDelete(row.id);
         }).catch(() => {
         });
-      },
+      }, */
       doDelete(ids) {
         this.tableLoading = true;
         var _this = this;

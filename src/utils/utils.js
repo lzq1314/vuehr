@@ -57,6 +57,10 @@ export const formatRoutes = (routes)=> {
           require(['../components/member/' + component + '.vue'], resolve)
         } else if(component.startsWith("Sho")){
           require(['../components/shopping/' + component + '.vue'], resolve)
+        } else if(component == "HistoryShoppingBasic"){
+          require(['../components/historyshopping/' + component + '.vue'], resolve)
+        } else if(component == "RechargeHistoryBasic"){
+          require(['../components/rechargeHistory/' + component + '.vue'], resolve)
         }
       },
       name: name,
