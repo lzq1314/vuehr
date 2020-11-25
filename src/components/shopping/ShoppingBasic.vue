@@ -131,6 +131,7 @@
        border
        stripe
        size="mini"
+       height="350"
        style="width: 80%">
        <el-table-column
          prop="commodity_name"
